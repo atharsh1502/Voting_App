@@ -1,6 +1,8 @@
 package com.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,14 +10,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @Tag(name = "Home Controller", description = "Endpoints for home, signin, register, about pages")
 public class HomeController {
 
-
-
-
 	@GetMapping("/")
-	@Operation(summary = "Get home page")
+	@Operation(summary = "Get home page - Welcome message")
 	public ResponseEntity<String> home()
 	{
 		return ResponseEntity.ok("Welcome to Voting Application");
@@ -33,7 +33,7 @@ public class HomeController {
 	@Operation(summary = "Get register page")
 	public ResponseEntity<String> register()
 	{
-		return ResponseEntity.ok("Register endpoint");
+		return ResponseEntity.ok("Register endpoint - use POST /register with User data");
 	}
 
 
@@ -41,7 +41,7 @@ public class HomeController {
 	@Operation(summary = "Get about page")
 	public ResponseEntity<String> about()
 	{
-		return ResponseEntity.ok("About Voting Application");
+		return ResponseEntity.ok("Voting Application - A complete voting system with user registration, authentication, and voting capabilities");
 	}
 
 }

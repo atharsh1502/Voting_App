@@ -6,21 +6,29 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(name = "users")
 public class User {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	@Column(unique=true)
+	
+	@Column(unique=true, nullable=false)
 	private String email;
+	
+	@Column(nullable=false)
 	private String name;
+	
+	@Column(nullable=false)
 	private String password;
+	
 	private int phone;
 	private String status;
-	private String role;
+	
+	@Column(nullable=false)
+	private String role = "ROLE_NORMAL";
 	
 	public int getId() {
 		return id;
