@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.model.User;
 import com.repository.UserRepository;
@@ -19,10 +20,19 @@ public class UserService {
 	@Autowired
 	private UserRepository userRepo;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	/** Register a brand-new user – always assigns ROLE_NORMAL */
 	public User addUser(User user) {
 		logger.info("Registering new user with email: {}", user.getEmail());
 		user.setRole("ROLE_NORMAL");
+		if (user.getPassword() != null
+				&& !user.getPassword().startsWith("$2a$")
+				&& !user.getPassword().startsWith("$2b$")
+				&& !user.getPassword().startsWith("$2y$")) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		}
 		User saved = this.userRepo.save(user);
 		logger.info("User registered successfully with id: {}", saved.getId());
 		return saved;
@@ -31,6 +41,12 @@ public class UserService {
 	/** Persist an existing user exactly as-is (role is NOT overridden) */
 	public User saveUser(User user) {
 		logger.info("Saving user with id: {} and email: {}", user.getId(), user.getEmail());
+		if (user.getPassword() != null
+				&& !user.getPassword().startsWith("$2a$")
+				&& !user.getPassword().startsWith("$2b$")
+				&& !user.getPassword().startsWith("$2y$")) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		}
 		User saved = this.userRepo.save(user);
 		logger.info("User saved successfully with id: {}", saved.getId());
 		return saved;
@@ -71,4 +87,3 @@ public class UserService {
 		return user;
 	}
 }
-

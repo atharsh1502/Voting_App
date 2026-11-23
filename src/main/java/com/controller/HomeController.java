@@ -2,6 +2,7 @@ package com.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,32 +20,33 @@ public class HomeController {
 
 	@GetMapping("/")
 	@Operation(summary = "Get home page - Welcome message")
-	public ResponseEntity<String> home() {
-		logger.info("GET / - Home page accessed");
+	public ResponseEntity<String> home()
+	{
+		logger.debug("Home endpoint requested");
 		return ResponseEntity.ok("Welcome to Voting Application");
 	}
 
 	@GetMapping("/signin")
 	@Operation(summary = "Get signin page")
-	public ResponseEntity<String> login() {
-		logger.info("GET /signin - Sign-in page accessed");
+	public ResponseEntity<String> login()
+	{
 		return ResponseEntity.ok("Signin endpoint");
 	}
 
+
 	@GetMapping("/register")
 	@Operation(summary = "Get register page")
-	public ResponseEntity<String> register() {
-		logger.info("GET /register - Register page accessed");
+	public ResponseEntity<String> register()
+	{
 		return ResponseEntity.ok("Register endpoint - use POST /register with User data");
 	}
 
+
 	@GetMapping("/about")
 	@Operation(summary = "Get about page")
-	public ResponseEntity<String> about() {
-		logger.info("GET /about - About page accessed");
+	public ResponseEntity<String> about()
+	{
 		return ResponseEntity.ok("Voting Application - A complete voting system with user registration, authentication, and voting capabilities");
 	}
+
 }
-
-
-

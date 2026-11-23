@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "users")
@@ -22,11 +23,11 @@ public class User {
 	private String name;
 	
 	@Column(nullable=false)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 	
 	private int phone;
 	private String status;
-	private String votedFor;
 	
 	@Column(nullable=false)
 	private String role = "ROLE_NORMAL";
@@ -66,12 +67,6 @@ public class User {
 	}
 	public void setStatus(String status) {
 		this.status = status;
-	}
-	public String getVotedFor() {
-		return votedFor;
-	}
-	public void setVotedFor(String votedFor) {
-		this.votedFor = votedFor;
 	}
 	public String getRole() {
 		return role;

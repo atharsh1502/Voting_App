@@ -19,6 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		username = username == null ? "" : username.trim().toLowerCase();
 		logger.info("loadUserByUsername - Attempting to load user: '{}'", username);
 
 		User user = userRepository.getUserByEmail(username);
@@ -33,5 +34,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return customUserDetails;
 	}
 }
-
 

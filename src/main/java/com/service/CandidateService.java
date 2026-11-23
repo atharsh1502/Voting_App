@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.model.Candidate;
+import com.model.User;
 import com.repository.CandidateRepository;
+import com.repository.UserRepository;
 
 @Service
 public class CandidateService {
@@ -19,6 +21,9 @@ public class CandidateService {
 
 	@Autowired
 	private CandidateRepository canRepo;
+
+	@Autowired
+	private UserRepository userRepo;
 
 	@Transactional
 	public Candidate addCandidate(Candidate can) {
@@ -70,6 +75,28 @@ public class CandidateService {
 		}
 		return found;
 	}
+
+	@Transactional
+	public String castVote(String email, String candidateName) {
+		User user = userRepo.getUserByEmailForUpdate(email);
+		if (user == null) {
+			return "USER_NOT_FOUND";
+		}
+		if (user.getStatus() != null) {
+			return "ALREADY_VOTED";
+		}
+
+		Candidate candidate = canRepo.getCandidateByCandidateForUpdate(candidateName);
+		if (candidate == null) {
+			return "CANDIDATE_NOT_FOUND";
+		}
+
+		candidate.setVotes(candidate.getVotes() + 1);
+		canRepo.save(candidate);
+
+		user.setStatus("Voted");
+		userRepo.save(user);
+		logger.info("Atomic vote recorded for user '{}' on candidate '{}'", email, candidateName);
+		return "SUCCESS";
+	}
 }
-
-

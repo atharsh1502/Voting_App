@@ -2,8 +2,6 @@ package com.config;
 
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -23,48 +21,56 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-public class MyConfig extends WebSecurityConfigurerAdapter {
-
-	private static final Logger logger = LoggerFactory.getLogger(MyConfig.class);
-
+public class MyConfig extends WebSecurityConfigurerAdapter{
+	
 	@Autowired
 	private AuthenticationSuccessHandler customSuccessHandler;
 
+	@Autowired
+	private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+	@Autowired
+	private CustomLogoutSuccessHandler customLogoutSuccessHandler;
+	
+	
 	@Bean
-	public UserDetailsService getUserDetailsService() {
-		logger.info("Initializing UserDetailsService");
+	public UserDetailsService getUserDetailsService()
+	{
 		return new UserDetailsServiceImpl();
 	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
+	
+	@Bean 
+	public PasswordEncoder passwordEncoder()
+	{
+		return new BCryptPasswordEncoder();
 	}
-
+	
 	@Bean
-	public DaoAuthenticationProvider authenticationProvider() {
-		logger.info("Configuring DaoAuthenticationProvider");
+	public DaoAuthenticationProvider authenticationProvider()
+	{
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
 		daoAuthenticationProvider.setUserDetailsService(this.getUserDetailsService());
 		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
 		return daoAuthenticationProvider;
 	}
-
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+	
+	protected void configure(AuthenticationManagerBuilder auth)throws Exception{
+		
 		auth.authenticationProvider(authenticationProvider());
 	}
-
+	
+	
+	
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		logger.info("Configuring HttpSecurity");
+	protected void configure(HttpSecurity http)throws Exception
+	{
 		http.cors()
 			.and()
 			.authorizeRequests()
-			.antMatchers("/", "/register", "/signin", "/about", "/candidates",
-					"/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+			.antMatchers("/", "/register", "/signin", "/about", "/candidates", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 			.antMatchers("/admin/**").hasRole("ADMIN")
 			.antMatchers("/user/**").hasRole("NORMAL")
-			.antMatchers("/vote", "/addcandidate", "/candidate/**").hasAnyRole("ADMIN", "NORMAL")
+			.antMatchers("/addcandidate", "/candidate/**").hasRole("NORMAL")
 			.antMatchers("/h2-console/**").permitAll()
 			.anyRequest().authenticated()
 			.and()
@@ -72,10 +78,12 @@ public class MyConfig extends WebSecurityConfigurerAdapter {
 			.loginPage("/signin")
 			.loginProcessingUrl("/dologin")
 			.successHandler(customSuccessHandler)
+			.failureHandler(customAuthenticationFailureHandler)
 			.permitAll()
 			.and()
 			.logout()
 			.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+			.logoutSuccessHandler(customLogoutSuccessHandler)
 			.permitAll()
 			.and()
 			.csrf().disable()
@@ -83,21 +91,18 @@ public class MyConfig extends WebSecurityConfigurerAdapter {
 			.and()
 			.httpBasic();
 	}
-
+	
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:3000"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-		configuration.setAllowCredentials(true);
-		configuration.setMaxAge(3600L);
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		logger.info("CORS configuration applied");
-		return source;
-	}
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
-
-
